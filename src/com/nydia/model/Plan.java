@@ -49,6 +49,9 @@ public class Plan {
     @SerializedName("Group Key")
     @Expose
     private List<String> groupKey = null;
+    @SerializedName("Sort Key")
+    @Expose
+    private List<String> sortKey = null;
     @SerializedName("Plans")
     @Expose
     private List<Plan> plans = null;
@@ -171,5 +174,13 @@ public class Plan {
 
     public void setAlias(String alias) {
         this.alias = alias;
+    }
+
+    public List<String> getSortKey() {
+        return sortKey;
+    }
+
+    public void setSortKey(List<String> sortKey) {
+        this.sortKey = sortKey;
     }
 }
