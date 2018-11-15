@@ -29,7 +29,7 @@ public class DbRepository {
                 ResultSet result = prepStatement.executeQuery();
                 while (result.next()) {
                     String results = result.getString(1);
-                    //System.out.println(results);
+                    System.out.println(results);
                     Response[] r = gson.fromJson(results, Response[].class);
 
                     //System.out.println(r[0].getPlan().getNodeType());

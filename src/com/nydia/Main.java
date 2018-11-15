@@ -24,7 +24,7 @@ public class Main {
         } while (!s.contains(";"));
         scanner.close();
 
-        System.out.println(userInput);
+        //System.out.println(userInput);
 
         //Connect to database
         DbUtil.getConnection();
@@ -32,15 +32,15 @@ public class Main {
 
         //Query to database
         Response r = dbRepository.getResponse(userInput);
-        buildQEP(r);
+        buildQEP(r, userInput);
 
     }
 
-    public static void buildQEP(Response r) {
+    public static void buildQEP(Response r, String query) {
         //Build the QEP tree
-        Node root = new Node(r.getPlan().getNodeType(), r.getPlan().getRelationName(), r.getPlan().getGroupKey(), r.getPlan().getSortKey());
+        Node root = new Node(r.getPlan());
         QEP qep = new QEP(root);
         qep.build(r.getPlan());
-        qep.printTree(root);
+        qep.printTree(root, query);
     }
 }
