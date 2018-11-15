@@ -46,6 +46,15 @@ public class Plan {
     @SerializedName("Filter")
     @Expose
     private String filter;
+    @SerializedName("Index Cond")
+    @Expose
+    private String indexCond;
+    @SerializedName("Merge Cond")
+    @Expose
+    private String mergCond;
+    @SerializedName("Hash Cond")
+    @Expose
+    private String hashCond;
     @SerializedName("Group Key")
     @Expose
     private List<String> groupKey = null;
@@ -182,5 +191,29 @@ public class Plan {
 
     public void setSortKey(List<String> sortKey) {
         this.sortKey = sortKey;
+    }
+
+    public String getIndexCond() {
+        return indexCond;
+    }
+
+    public void setIndexCond(String indexCond) {
+        this.indexCond = indexCond;
+    }
+
+    public String getMergCond() {
+        return mergCond;
+    }
+
+    public void setMergCond(String mergCond) {
+        this.mergCond = mergCond;
+    }
+
+    public String getHashCond() {
+        return hashCond;
+    }
+
+    public void setHashCond(String hashCond) {
+        this.hashCond = hashCond;
     }
 }

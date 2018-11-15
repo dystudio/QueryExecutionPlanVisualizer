@@ -42,7 +42,7 @@ public class QEP {
             return;
         }
         System.out.printf("Node: %s \n", node.getType());
-        node.getCorrespondingQuery(query);
+        System.out.println(node.getCorrespondingQuery(query));
         //System.out.print("Left child: ");
         printTree(node.getLeftChild(), query);
         //System.out.print("Right child: ");
@@ -52,6 +52,20 @@ public class QEP {
 
     public Node getRoot() {
         return root;
+    }
+
+    public int getLevel(Node root, int level) {
+        if (root == null)
+            return level;
+        int level1 = getLevel(root.getLeftChild(), level+1);
+        int level2 = getLevel(root.getRightChild(), level + 1);
+        return max(level1, level2);
+    }
+
+    private int max(int level1, int level2) {
+        if (level1 >= level2)
+            return level1;
+        else return level2;
     }
 
     public void visualize() {}

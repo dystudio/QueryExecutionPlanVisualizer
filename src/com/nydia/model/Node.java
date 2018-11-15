@@ -52,10 +52,32 @@ public class Node {
     }
 
     public String getCorrespondingQuery(String query) {
+        String result = "";
+
         if (this.type.contains("Join")) {
             //Find substring that contains join
-            String pattern = "join";
-            Pattern limitPattern = Pattern.compile(pattern);
+            String pattern = "(join)?";
+            if (plan.getMergCond() != null) {
+                pattern = conditionStatement("\\b(WHERE|AND|OR)\\b .*(\\.|[\\s])?", plan.getMergCond());
+
+                Pattern limitPattern = Pattern.compile(pattern.toLowerCase());
+                Matcher m = limitPattern.matcher(query.toLowerCase());
+                //System.out.println(limitPattern);
+                if (m.find()) {
+                    System.out.println(query.substring(m.start(), m.end()));
+                }
+            }
+            if (plan.getHashCond() != null) {
+                pattern = conditionStatement("\\b(WHERE|AND|OR)\\b .*(\\.|[\\s])?", plan.getHashCond());
+
+                Pattern limitPattern = Pattern.compile(pattern.toLowerCase());
+                Matcher m = limitPattern.matcher(query.toLowerCase());
+                //System.out.println(limitPattern);
+                if (m.find()) {
+                    System.out.println(query.substring(m.start(), m.end()));
+                }
+            }
+            Pattern limitPattern = Pattern.compile(pattern.toLowerCase());
             Matcher m = limitPattern.matcher(query.toLowerCase());
             if (m.find()) {
                 System.out.println(query.substring(m.start(), m.end()));
@@ -90,7 +112,7 @@ public class Node {
                 } catch (StringIndexOutOfBoundsException e) {
                     //Do nothing
                 }
-                tempQuery += " " + strbldr.toString().replace("(", "\\(").replace(")", "\\)");
+                tempQuery += " " + strbldr.toString().replace("(", "\\(?").replace(")", "\\)?");
             }
 
             Pattern limitPattern = Pattern.compile(tempQuery.toLowerCase());
@@ -104,31 +126,79 @@ public class Node {
         else if (this.type.contains("Aggregate")){
             //Find substring that contains "Group by [x]"
             String pattern = "group by";
-            for (int i = 0; i < plan.getGroupKey().size(); i++) {
-                pattern += " " + plan.getGroupKey().get(i);
+            if (plan.getGroupKey() != null) {
+                for (int i = 0; i < plan.getGroupKey().size(); i++) {
+                    pattern += " " + plan.getGroupKey().get(i);
+                }
+                Pattern limitPattern = Pattern.compile(pattern);
+                Matcher m = limitPattern.matcher(query.toLowerCase());
+                if (m.find()) {
+                    System.out.println(query.substring(m.start(), m.end()));
+                }
             }
-            Pattern limitPattern = Pattern.compile(pattern);
-            Matcher m = limitPattern.matcher(query.toLowerCase());
-            if (m.find()) {
-                System.out.println(query.substring(m.start(), m.end()));
+            if (plan.getFilter() != null) {
+                pattern = conditionStatement("HAVING", plan.getFilter());
+
+                Pattern limitPattern = Pattern.compile(pattern.toLowerCase());
+                Matcher m = limitPattern.matcher(query.toLowerCase());
+                //System.out.println(limitPattern);
+                if (m.find()) {
+                    System.out.println(query.substring(m.start(), m.end()));
+                }
+            }
+            else {
+                pattern = "COUNT[\\s]*\\(.*\\)";
+                Pattern limitPattern = Pattern.compile(pattern.toLowerCase());
+                Matcher m = limitPattern.matcher(query.toLowerCase());
+                if (m.find()) {
+                    System.out.println(query.substring(m.start(), m.end()));
+                }
             }
             return "Aggregate";
         }
         else if (this.type.contains("Scan")) {
             //Find substring that contains WHERE
-            String pattern = "where";
-            StringBuilder strbldr = new StringBuilder(plan.getSortKey().get(0));
 
-            try {
-                int firstBracket = plan.getSortKey().get(0).indexOf("(");
-                strbldr = strbldr.deleteCharAt(firstBracket);
-                int lastBracket = strbldr.toString().lastIndexOf(")");
-                strbldr = strbldr.deleteCharAt(lastBracket);
-            } catch (StringIndexOutOfBoundsException e) {
-                //Do nothing
+            if (plan.getFilter() != null) {
+                String pattern = conditionStatement("\\b(WHERE|AND|OR)\\b .*(\\.|[\\s])?", plan.getFilter());
+
+                Pattern limitPattern = Pattern.compile(pattern.toLowerCase());
+                Matcher m = limitPattern.matcher(query.toLowerCase());
+                //System.out.println(limitPattern);
+                if (m.find()) {
+                    result += query.substring(m.start(), m.end());
+                }
             }
-            pattern += " " + strbldr.toString().replace("(", "\\(").replace(")", "\\)");
+
+            if (plan.getIndexCond() != null) {
+                String pattern = conditionStatement("\\b(WHERE|AND|OR)\\b .*(\\.|[\\s])?", plan.getIndexCond());
+
+                Pattern limitPattern = Pattern.compile(pattern.toLowerCase());
+                Matcher m = limitPattern.matcher(query.toLowerCase());
+                //System.out.println(query.toLowerCase());
+                //System.out.println(pattern.toLowerCase());
+                //System.out.println(limitPattern);
+                if (m.find()) {
+                    result = query.substring(m.start(), m.end());
+                }
+            }
+
         }
-        return null;
+        return result;
+    }
+
+    /* Regex for condition statement*/
+    private String conditionStatement(String head, String statement) {
+        String pattern = head;
+        pattern+= statement.replace("(", "\\(?.*\\.")
+                .replace(")", "\\)?")
+                .replace("::text", "")
+                .replace("::bpchar", "")
+                .replace("'", "\\'")
+                .replace(" = ", "[\\s]*=[\\s]*")
+                .replace("~~", "like")
+                .replaceAll(".*\\.", ".*\\.");
+
+        return pattern.toLowerCase();
     }
 }

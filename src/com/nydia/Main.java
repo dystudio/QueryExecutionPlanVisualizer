@@ -24,7 +24,7 @@ public class Main {
         } while (!s.contains(";"));
         scanner.close();
 
-        //System.out.println(userInput);
+        System.out.println(userInput.toLowerCase());
 
         //Connect to database
         DbUtil.getConnection();
