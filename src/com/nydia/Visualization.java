@@ -91,7 +91,6 @@ public class Visualization extends JPanel {
         Response r = dbRepository.getResponse(userInput);
         QEP qep = buildQEP(r, userInput);
 
-
         //Visualization
         Visualization panel = new Visualization(qep);
         int width = panel.calculateDimensions();
@@ -152,16 +151,7 @@ public class Visualization extends JPanel {
     private static int tambahY;
     private static int tambahX;
 
-    private int what(int level, int x){
-        x = 160;
-        while (level > 0) {
-            x += 160/level;
-            level--;
-        }
-        return x;
-    }
-
-    private int calculateDimensions() {
+    public int calculateDimensions() {
         int result = windowWidth;
         Node root = qep.getRoot();
         int n = qep.getLevel(root, 0);
@@ -191,10 +181,11 @@ public class Visualization extends JPanel {
     private void paintNode(Graphics g, Node root, int x, int y, int level) {
         if (root == null)
             return;
-
+        g.setFont(new Font("default",Font.BOLD,12));
         g.setColor(Color.black);
 
         String text = root.getType();
+        String text2 = root.getCorrespondingQuery(userInput);
         int centerX = x, centerY = y;
         int ovalWidth = 150, ovalHeight = 50;
 
@@ -208,7 +199,12 @@ public class Visualization extends JPanel {
         double textWidth = fm.getStringBounds(text, g).getWidth();
         g.setColor(Color.WHITE);
         g.drawString(text, (int) (centerX - textWidth/2),
-                (int) (centerY + fm.getMaxAscent() / 2));
+                (int) (centerY + fm.getMaxAscent()/2));
+        FontMetrics fm2 = g.getFontMetrics();
+        double textWidth2 = fm.getStringBounds(text2, g).getWidth();
+        g.setColor(Color.RED);
+        g.drawString(text2, (int) (centerX - textWidth2/2),
+                (int) (centerY - fm2.getMaxAscent()/1.5));
 
         if (root.getRightChild() != null) {
             g.setColor(Color.black);
