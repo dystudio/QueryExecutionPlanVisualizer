@@ -7,81 +7,24 @@ import com.nydia.repository.DbRepository;
 import com.nydia.util.DbUtil;
 
 import java.awt.*;
-import java.awt.event.AdjustmentEvent;
-import java.awt.event.AdjustmentListener;
-import java.util.Iterator;
+import java.util.Arrays;
 
 import javax.swing.*;
-import java.util.Scanner;
 
 public class Visualization extends JPanel {
     private static final long serialVersionUID = 1L;
 
-    private static final int WIDTH = 5;
-    private static final int HEIGHT = 5;
-
-    private static final int SCALE_X = 30;
-    private static final int SCALE_Y = 30;
+    private static int tambahY;
+    private static int tambahX;
 
     private static final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+
+    private static String userInput;
 
     private static final int windowWidth = screenSize.width * 2 /3;
     private static final int windowHeight = screenSize.height;
 
     private static QEP qep;
-    private int scaleX;
-
-    public static void main(String[] args) {
-        String userInput = "";
-        String s;
-
-        Scanner scanner = new Scanner(System.in);
-
-        do {
-            s = scanner.nextLine();
-            userInput += s + "\n";
-        } while (!s.contains(";"));
-        scanner.close();
-
-        System.out.println(userInput.toLowerCase());
-
-        //Connect to database
-        DbUtil.getConnection();
-        DbRepository dbRepository = new DbRepository();
-
-        //Query to database
-        Response r = dbRepository.getResponse(userInput);
-        QEP qep = buildQEP(r, userInput);
-
-        //Visualization
-        Visualization panel = new Visualization(qep);
-        panel.setPreferredSize(new Dimension(windowWidth+500, 2000));
-        JFrame window = new JFrame();
-
-        //window.setSize(windowWidth, windowHeight);
-        window.setLocationRelativeTo(null);
-        //panel.add(new Visualization(qep));
-        //panel.setVisible(true);
-        JScrollPane jsp = new JScrollPane(panel);
-        jsp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-        jsp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        jsp.setBounds(0, 0, windowWidth+500, windowHeight);
-        JPanel contentPane = new JPanel(null);
-        contentPane.setPreferredSize(new Dimension(windowWidth, windowHeight-200));
-        contentPane.add(jsp);
-
-        window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        window.setContentPane(contentPane);
-        //window.setContentPane(new Visualization(qep));
-        //window.add(jsp);
-        //window.add(panel);
-        window.pack();
-
-
-        window.setVisible(true);
-       //new Visualization(qep);
-    }
 
     public static void initQEP(String userInput) {
         DbUtil.getConnection();
@@ -92,7 +35,7 @@ public class Visualization extends JPanel {
         QEP qep = buildQEP(r, userInput);
 
         //Visualization
-        Visualization panel = new Visualization(qep);
+        Visualization panel = new Visualization(qep, userInput);
         int width = panel.calculateDimensions();
         panel.setPreferredSize(new Dimension(width, windowHeight));
         JFrame window = new JFrame();
@@ -110,7 +53,7 @@ public class Visualization extends JPanel {
         });
         jsp.getVerticalScrollBar().addAdjustmentListener(e ->
         {
-            // Repaints the panel each time the horizontal scroll bar is moves, in order to avoid ghosting.
+            // Repaints the panel each time the vertical scroll bar is moves, in order to avoid ghosting.
             jsp.revalidate();
             jsp.repaint();
         });
@@ -123,9 +66,6 @@ public class Visualization extends JPanel {
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         window.setContentPane(contentPane);
-        //window.setContentPane(new Visualization(qep));
-        //window.add(jsp);
-        //window.add(panel);
         window.pack();
 
         window.setVisible(true);
@@ -140,16 +80,11 @@ public class Visualization extends JPanel {
         return qep;
     }
 
-    public Visualization(QEP qep)  {
+    public Visualization(QEP qep, String userInput)  {
         this.qep = qep;
+        this.userInput = userInput;
     }
 
-    private void fillRect(Graphics graphics, int x, int y) {
-        graphics.fillRect(SCALE_X * x, SCALE_Y * y, SCALE_X, SCALE_Y);
-    }
-
-    private static int tambahY;
-    private static int tambahX;
 
     public int calculateDimensions() {
         int result = windowWidth;
@@ -160,8 +95,12 @@ public class Visualization extends JPanel {
         System.out.println(n);
         System.out.println(depth);
         tambahY = (windowHeight-50)/(n);
+
+        if (temp == 0)
+            return result;
+
         tambahX = windowWidth/temp;
-        while (160*temp > result) {
+        while (500*temp > result) {
             result += 160;
         }
         tambahX = 160*depth;                                                                           ;
@@ -185,11 +124,11 @@ public class Visualization extends JPanel {
         g.setColor(Color.black);
 
         String text = root.getType();
-        String text2 = root.getCorrespondingQuery(userInput);
+
         int centerX = x, centerY = y;
         int ovalWidth = 150, ovalHeight = 50;
 
-        // Draw oval
+        // Draw rectangle
         g.setColor(Color.BLUE);
         g.fillRect(centerX-ovalWidth/2, centerY-ovalHeight/2,
                 ovalWidth, ovalHeight);
@@ -201,17 +140,34 @@ public class Visualization extends JPanel {
         g.drawString(text, (int) (centerX - textWidth/2),
                 (int) (centerY + fm.getMaxAscent()/2));
         FontMetrics fm2 = g.getFontMetrics();
-        double textWidth2 = fm.getStringBounds(text2, g).getWidth();
-        g.setColor(Color.RED);
-        g.drawString(text2, (int) (centerX - textWidth2/2),
-                (int) (centerY - fm2.getMaxAscent()/1.5));
+
+        //Draw corresponding query, if any
+        // Draw rectangle
+        String text2 = root.getCorrespondingQuery(userInput);
+        if (text2.length() > 0) {
+            String[] result = cut(text2);
+            centerX = x - 200;
+            ovalHeight = 20;
+            ovalWidth += 30;
+            for (int i = 0; i < result.length; i++) {
+                g.setColor(Color.yellow);
+                g.fillRect(centerX - ovalWidth / 2, centerY - ovalHeight / 2,
+                        ovalWidth, ovalHeight);
+
+                double textWidth2 = fm.getStringBounds(result[i], g).getWidth();
+                g.setColor(Color.black);
+
+                g.drawString(result[i], (int) (centerX -  textWidth2 / 2),
+                        (int) (centerY + fm.getMaxAscent() / 2));
+                centerY += 20;
+            }
+        }
 
         if (root.getRightChild() != null) {
             g.setColor(Color.black);
             g.drawLine(x, y + ovalHeight/2, x - level, y+tambahY +ovalHeight/2);
             paintNode(g, root.getLeftChild(), x - level, y+tambahY, tambahX/2);
 
-            //System.out.println(level);
             g.setColor(Color.black);
             g.drawLine(x, y + ovalHeight/2, x + level, y+tambahY +ovalHeight/2);
             paintNode(g, root.getRightChild(), x + level, y+tambahY, tambahX/2);
@@ -223,6 +179,16 @@ public class Visualization extends JPanel {
             paintNode(g, root.getLeftChild(), x, y+tambahY, level);
 
         }
+    }
+
+    private String[] cut(String text2) {
+        String[] result = text2.split("(?<!\\G\\S+)\\s");
+        String text2result = "";
+        for (int i = 0; i < result.length; i++) {
+            text2result += result[i] + "\n";
+        }
+        //System.out.println(text2result);
+        return result;
     }
 
 

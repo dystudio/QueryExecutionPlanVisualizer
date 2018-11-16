@@ -87,10 +87,10 @@ public class Node {
             }
             return result;
         }
-        else if (this.type.contains("Loop")) {
+        /*else if (this.type.contains("Loop")) {
             //Find substring
             return "Loop";
-        }
+        }*/
         else if (this.type.contains("Limit")){
             //Find substring that contains "limit [number]"
             Pattern limitPattern = Pattern.compile("limit " + plan.getPlanRows());
