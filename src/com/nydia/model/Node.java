@@ -58,7 +58,7 @@ public class Node {
             //Find substring that contains join
             String pattern = "(join)?";
             if (plan.getMergCond() != null) {
-                pattern = conditionStatement("\\b(WHERE|AND|OR)\\b .*(\\.|[\\s])?", plan.getMergCond());
+                pattern = conditionStatement("\\b(WHERE|AND|OR|ON)\\b[\\s]?", plan.getMergCond());
 
                 Pattern limitPattern = Pattern.compile(pattern.toLowerCase());
                 Matcher m = limitPattern.matcher(query.toLowerCase());
@@ -69,7 +69,7 @@ public class Node {
                 }
             }
             if (plan.getHashCond() != null) {
-                pattern = conditionStatement("\\b(WHERE|AND|OR)\\b .*(\\.|[\\s])?", plan.getHashCond());
+                pattern = conditionStatement("\\b(WHERE|AND|OR|ON)\\b[\\s]?", plan.getHashCond());
 
                 Pattern limitPattern = Pattern.compile(pattern.toLowerCase());
                 Matcher m = limitPattern.matcher(query.toLowerCase());
@@ -168,7 +168,7 @@ public class Node {
             //Find substring that contains WHERE
 
             if (plan.getFilter() != null) {
-                String pattern = conditionStatement("\\b(WHERE|AND|OR)\\b[\\s]?", plan.getFilter());
+                String pattern = conditionStatement("\\b(WHERE|AND|OR|ON)\\b[\\s]?", plan.getFilter());
 
                 Pattern limitPattern = Pattern.compile(pattern.toLowerCase());
                 Matcher m = limitPattern.matcher(query.toLowerCase());
@@ -180,7 +180,7 @@ public class Node {
 
             if (plan.getIndexCond() != null) {
                 //"\\b(WHERE|AND|OR)\\b .*(\\.|[\\s])?"
-                String pattern = conditionStatement("\\b(WHERE|AND|OR)\\b[\\s]?", plan.getIndexCond());
+                String pattern = conditionStatement("\\b(WHERE|AND|OR|ON)\\b[\\s]?", plan.getIndexCond());
 
                 Pattern limitPattern = Pattern.compile(pattern.toLowerCase());
                 Matcher m = limitPattern.matcher(query.toLowerCase());
