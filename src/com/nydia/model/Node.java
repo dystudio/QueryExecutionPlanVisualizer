@@ -154,7 +154,7 @@ public class Node {
                 }
             }
             else {
-                pattern = "COUNT[\\s]*\\(.*\\)";
+                pattern = "COUNT[\\s]*\\([\\w|\\*]+\\)";
                 Pattern limitPattern = Pattern.compile(pattern.toLowerCase());
                 Matcher m = limitPattern.matcher(query.toLowerCase());
                 if (m.find()) {
@@ -168,7 +168,7 @@ public class Node {
             //Find substring that contains WHERE
 
             if (plan.getFilter() != null) {
-                String pattern = conditionStatement("\\b(WHERE|AND|OR)\\b .*(\\.|[\\s])?", plan.getFilter());
+                String pattern = conditionStatement("\\b(WHERE|AND|OR)\\b[\\s]?", plan.getFilter());
 
                 Pattern limitPattern = Pattern.compile(pattern.toLowerCase());
                 Matcher m = limitPattern.matcher(query.toLowerCase());
@@ -179,13 +179,14 @@ public class Node {
             }
 
             if (plan.getIndexCond() != null) {
-                String pattern = conditionStatement("\\b(WHERE|AND|OR)\\b .*(\\.|[\\s])?", plan.getIndexCond());
+                //"\\b(WHERE|AND|OR)\\b .*(\\.|[\\s])?"
+                String pattern = conditionStatement("\\b(WHERE|AND|OR)\\b[\\s]?", plan.getIndexCond());
 
                 Pattern limitPattern = Pattern.compile(pattern.toLowerCase());
                 Matcher m = limitPattern.matcher(query.toLowerCase());
                 //System.out.println(query.toLowerCase());
                 //System.out.println(pattern.toLowerCase());
-                //System.out.println(limitPattern);
+                System.out.println(limitPattern);
                 if (m.find()) {
                     result = query.substring(m.start(), m.end());
                 }
@@ -198,14 +199,17 @@ public class Node {
     /* Regex for condition statement*/
     private String conditionStatement(String head, String statement) {
         String pattern = head;
-        pattern+= statement.replace("(", "\\(?.*\\.")
+        pattern+= statement
+                .replace("*", "\\*")
                 .replace(")", "\\)?")
+                .replaceAll("\\w+\\.", "replacethisplease")
+                .replace("replacethisplease", "[\\s]*[\\w]*\\.")
+                .replace("(", "\\(?([\\s]*[\\w]*\\.)?")
                 .replace("::text", "")
                 .replace("::bpchar", "")
                 .replace("'", "\\'")
                 .replace(" = ", "[\\s]*=[\\s]*")
-                .replace("~~", "like")
-                .replaceAll(".*\\.", ".*\\.");
+                .replace("~~", "like");
 
         return pattern.toLowerCase();
     }
