@@ -64,6 +64,7 @@ public class Node {
                 Matcher m = limitPattern.matcher(query.toLowerCase());
                 //System.out.println(limitPattern);
                 if (m.find()) {
+                	result = query.substring(m.start(), m.end());
                     System.out.println(query.substring(m.start(), m.end()));
                 }
             }
@@ -74,15 +75,17 @@ public class Node {
                 Matcher m = limitPattern.matcher(query.toLowerCase());
                 //System.out.println(limitPattern);
                 if (m.find()) {
+                	result = query.substring(m.start(), m.end());
                     System.out.println(query.substring(m.start(), m.end()));
                 }
             }
             Pattern limitPattern = Pattern.compile(pattern.toLowerCase());
             Matcher m = limitPattern.matcher(query.toLowerCase());
             if (m.find()) {
+            	result = query.substring(m.start(), m.end());
                 System.out.println(query.substring(m.start(), m.end()));
             }
-            return "Join";
+            return result;
         }
         else if (this.type.contains("Loop")) {
             //Find substring
@@ -93,9 +96,10 @@ public class Node {
             Pattern limitPattern = Pattern.compile("limit " + plan.getPlanRows());
             Matcher m = limitPattern.matcher(query.toLowerCase());
             if (m.find()) {
+            	result = query.substring(m.start(), m.end());
                 System.out.println(query.substring(m.start(), m.end()));
             }
-            return "Limit";
+            return result;
         }
         else if (this.type.contains("Sort")){
             //Find substring that contains "order by [sortkey]"
@@ -119,9 +123,10 @@ public class Node {
             Matcher m = limitPattern.matcher(query.toLowerCase());
 
             if (m.find()) {
+            	result = query.substring(m.start(), m.end());
                 System.out.println(query.substring(m.start(), m.end()));
             }
-            return "Sort";
+            return result;
         }
         else if (this.type.contains("Aggregate")){
             //Find substring that contains "Group by [x]"
@@ -133,6 +138,7 @@ public class Node {
                 Pattern limitPattern = Pattern.compile(pattern);
                 Matcher m = limitPattern.matcher(query.toLowerCase());
                 if (m.find()) {
+                	result = query.substring(m.start(), m.end());
                     System.out.println(query.substring(m.start(), m.end()));
                 }
             }
@@ -143,6 +149,7 @@ public class Node {
                 Matcher m = limitPattern.matcher(query.toLowerCase());
                 //System.out.println(limitPattern);
                 if (m.find()) {
+                	result = query.substring(m.start(), m.end());
                     System.out.println(query.substring(m.start(), m.end()));
                 }
             }
@@ -151,10 +158,11 @@ public class Node {
                 Pattern limitPattern = Pattern.compile(pattern.toLowerCase());
                 Matcher m = limitPattern.matcher(query.toLowerCase());
                 if (m.find()) {
+                	result = query.substring(m.start(), m.end());
                     System.out.println(query.substring(m.start(), m.end()));
                 }
             }
-            return "Aggregate";
+            return result;
         }
         else if (this.type.contains("Scan")) {
             //Find substring that contains WHERE

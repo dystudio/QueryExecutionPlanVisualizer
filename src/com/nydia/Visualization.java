@@ -29,6 +29,7 @@ public class Visualization extends JPanel {
     private static final int windowHeight = screenSize.height;
 
     private static QEP qep;
+    private static String userInput;
     private int scaleX;
 
     public static void main(String[] args) {
@@ -54,7 +55,7 @@ public class Visualization extends JPanel {
         QEP qep = buildQEP(r, userInput);
 
         //Visualization
-        Visualization panel = new Visualization(qep);
+        Visualization panel = new Visualization(qep,userInput);
         panel.setPreferredSize(new Dimension(windowWidth+500, 2000));
         JFrame window = new JFrame();
 
@@ -92,7 +93,7 @@ public class Visualization extends JPanel {
         QEP qep = buildQEP(r, userInput);
 
         //Visualization
-        Visualization panel = new Visualization(qep);
+        Visualization panel = new Visualization(qep,userInput);
         panel.setPreferredSize(new Dimension(panel.calculateDimensions(), windowHeight));
         System.out.println(panel.calculateDimensions());
         JFrame window = new JFrame();
@@ -128,8 +129,9 @@ public class Visualization extends JPanel {
         return qep;
     }
 
-    public Visualization(QEP qep)  {
+    public Visualization(QEP qep, String userInput)  {
         this.qep = qep;
+        this.userInput = userInput;
     }
 
     private void fillRect(Graphics graphics, int x, int y) {
@@ -198,10 +200,11 @@ public class Visualization extends JPanel {
     private void paintNode(Graphics g, Node root, int x, int y, int level) {
         if (root == null)
             return;
-
+        g.setFont(new Font("default",Font.BOLD,12));
         g.setColor(Color.black);
 
         String text = root.getType();
+        String text2 = root.getCorrespondingQuery(userInput); 
         int centerX = x, centerY = y;
         int ovalWidth = 150, ovalHeight = 50;
 
@@ -215,7 +218,12 @@ public class Visualization extends JPanel {
         double textWidth = fm.getStringBounds(text, g).getWidth();
         g.setColor(Color.WHITE);
         g.drawString(text, (int) (centerX - textWidth/2),
-                (int) (centerY + fm.getMaxAscent() / 2));
+                (int) (centerY + fm.getMaxAscent()/2));
+        FontMetrics fm2 = g.getFontMetrics();
+        double textWidth2 = fm.getStringBounds(text2, g).getWidth();
+        g.setColor(Color.RED);
+        g.drawString(text2, (int) (centerX - textWidth2/2),
+                (int) (centerY - fm2.getMaxAscent()/1.5));
 
         if (root.getRightChild() != null) {
             g.setColor(Color.black);
