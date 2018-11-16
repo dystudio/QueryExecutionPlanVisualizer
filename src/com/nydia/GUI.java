@@ -51,9 +51,7 @@ public class GUI {
             public void actionPerformed(ActionEvent arg0) {
                 String userInput = textField.getText();
                 System.out.println(userInput);
-//                QEPResults qep = new QEPResults();
                 Visualization.initQEP(userInput);
-                //qep.setVisible(true);
 
             }
         });

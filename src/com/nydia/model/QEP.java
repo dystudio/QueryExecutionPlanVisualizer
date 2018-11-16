@@ -62,6 +62,17 @@ public class QEP {
         return max(level1, level2);
     }
 
+    public int getDepth(Node root) {
+        if(root == null)
+            return 0;
+        int num_l=0, num_r=0;
+        if(root.getLeftChild() != null)
+            num_l = getDepth(root.getLeftChild());
+        if(root.getRightChild() != null)
+            num_r = getDepth(root.getRightChild())+1;
+        return num_l+num_r;
+    }
+
     private int max(int level1, int level2) {
         if (level1 >= level2)
             return level1;

@@ -91,10 +91,11 @@ public class Visualization extends JPanel {
         Response r = dbRepository.getResponse(userInput);
         QEP qep = buildQEP(r, userInput);
 
+
         //Visualization
         Visualization panel = new Visualization(qep);
-        panel.setPreferredSize(new Dimension(panel.calculateDimensions(), windowHeight));
-        System.out.println(panel.calculateDimensions());
+        int width = panel.calculateDimensions();
+        panel.setPreferredSize(new Dimension(width, windowHeight));
         JFrame window = new JFrame();
 
         window.setLocationRelativeTo(null);
@@ -102,6 +103,20 @@ public class Visualization extends JPanel {
         jsp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         jsp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         jsp.setBounds(0, 0, windowWidth, windowHeight-100);
+        jsp.getHorizontalScrollBar().addAdjustmentListener(e ->
+        {
+            // Repaints the panel each time the horizontal scroll bar is moves, in order to avoid ghosting.
+            jsp.revalidate();
+            jsp.repaint();
+        });
+        jsp.getVerticalScrollBar().addAdjustmentListener(e ->
+        {
+            // Repaints the panel each time the horizontal scroll bar is moves, in order to avoid ghosting.
+            jsp.revalidate();
+            jsp.repaint();
+        });
+
+
         JPanel contentPane = new JPanel(null);
         contentPane.setPreferredSize(new Dimension(windowWidth, windowHeight-100));
         contentPane.add(jsp);
@@ -114,12 +129,10 @@ public class Visualization extends JPanel {
         //window.add(panel);
         window.pack();
 
-        window.revalidate();
-        window.repaint();
         window.setVisible(true);
     }
 
-    public static QEP buildQEP(Response r, String query) {
+    private static QEP buildQEP(Response r, String query) {
         //Build the QEP tree
         Node root = new Node(r.getPlan());
         QEP qep = new QEP(root);
@@ -139,21 +152,29 @@ public class Visualization extends JPanel {
     private static int tambahY;
     private static int tambahX;
 
-    public int calculateDimensions() {
+    private int what(int level, int x){
+        x = 160;
+        while (level > 0) {
+            x += 160/level;
+            level--;
+        }
+        return x;
+    }
+
+    private int calculateDimensions() {
         int result = windowWidth;
         Node root = qep.getRoot();
         int n = qep.getLevel(root, 0);
-        int temp = (int) Math.pow(2, n)-1;
+        int depth = qep.getDepth(root);
+        int temp = (int) Math.pow(2, depth)-1;
         System.out.println(n);
-        System.out.println(temp);
+        System.out.println(depth);
         tambahY = (windowHeight-50)/(n);
         tambahX = windowWidth/temp;
-        while (tambahX < 80) {
+        while (160*temp > result) {
             result += 160;
-            System.out.println(result);
-            tambahX = result/temp;
         }
-        tambahX = tambahX*n;
+        tambahX = 160*depth;                                                                           ;
         return result;
     }
 
@@ -161,38 +182,10 @@ public class Visualization extends JPanel {
     public void paint(Graphics graphics) {
         Dimension dim = getSize ();
         graphics.setColor(Color.LIGHT_GRAY);
-        //graphics.fillRect(0, 0, SCALE_X * WIDTH, SCALE_Y * HEIGHT);
 
         Node root = qep.getRoot();
-        int n = qep.getLevel(root, 0);
-        int temp = (int) Math.pow(2, n)-1;
-        tambahY = (dim.height-50)/(n);
-        /*while (tambahX < 160) {
-            dim.setSize(dim.width + 160, dim.height);
-            dim = getSize ();
-            System.out.println(dim.width);
-            tambahX = dim.width/temp;
-            System.out.println(tambahX);
-        }*/
 
         paintNode(graphics, root, dim.width/2, 50, tambahX);
-        //paintNode(graphics, root, n);
-    }
-
-    private void paintNode(Graphics g, Node root, int level) {
-        int leaves = 2^level;
-        int centerX = 75;
-        int centerY = 0;
-        for (int i = 0; i < leaves; i ++) {
-            //centerY += 150;
-            int ovalWidth = 150, ovalHeight = 50;
-
-            // Draw oval
-            g.setColor(Color.BLUE);
-            g.fillRect(centerX - ovalWidth / 2, centerY - ovalHeight / 2,
-                    ovalWidth, ovalHeight);
-            centerX += 160;
-        }
     }
 
     private void paintNode(Graphics g, Node root, int x, int y, int level) {
@@ -219,8 +212,8 @@ public class Visualization extends JPanel {
 
         if (root.getRightChild() != null) {
             g.setColor(Color.black);
-            g.drawLine(x, y + ovalHeight/2, x - (level), y+tambahY +ovalHeight/2);
-            paintNode(g, root.getLeftChild(), x - (level), y+tambahY, tambahX/2);
+            g.drawLine(x, y + ovalHeight/2, x - level, y+tambahY +ovalHeight/2);
+            paintNode(g, root.getLeftChild(), x - level, y+tambahY, tambahX/2);
 
             //System.out.println(level);
             g.setColor(Color.black);
